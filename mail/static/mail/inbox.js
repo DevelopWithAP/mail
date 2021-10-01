@@ -24,6 +24,7 @@ function compose_email() {
   // attach event listener to form
   const submitForm = document.querySelector('#compose-form');
   submitForm.addEventListener('submit', (event) => {
+    // prevent default submission
     event.preventDefault();
 
     // collect form inputs
@@ -42,14 +43,12 @@ function compose_email() {
     })
     .then((response)=> response.json())
     .then((result)=> console.log(result));
+    // load 'sent' box
     load_mailbox('sent');
   })
 
 
 }
-
-
-  
 
 function load_mailbox(mailbox) {
   
@@ -59,4 +58,31 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+
+  // make the request for a specific mailbox
+  fetch(`/emails/${mailbox}`)
+  .then((response)=>response.json())
+  .then((emails)=>{
+    let emailDiv = document.createElement('div');
+    emailDiv.setAttribute('class', 'border rounded mb-2');
+    emailDiv.setAttribute('id', 'emailDivId');
+    for (let email of emails) {
+      // render div for a specific email
+      // let emailDiv = document.createElement('div');
+      // emailDiv.setAttribute('class', 'border rounded mb-2');
+      // emailDiv.setAttribute('id', 'emailDivId');
+      emailDiv.innerHTML = `
+        <h5 style="margin-left: 4px;"> ${email.sender} </h5>
+        <p style="margin-left: 4px;"> Subject: ${email.subject} </p>
+        <small style="margin-left: 4px;"> Sent: ${email.timestamp} </small>
+      `;
+      document.querySelector('#emails-view').append(emailDiv);
+      emailDiv.addEventListener('click', ()=> displayEmail(email.id));
+    }
+  });
+} 
+
+function displayEmail(id){
+  
 }
