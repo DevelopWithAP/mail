@@ -108,7 +108,14 @@ function renderEmailList(email, mailbox) {
     archiveBtn.setAttribute('class', 'btn btn-sm btn-primary m-2 archive');
     archiveBtn.innerHTML = 'archive';
     emailDiv.appendChild(archiveBtn);
-    archiveBtn.addEventListener('click', ()=> toggleArchive(email.id));
+    archiveBtn.addEventListener('click', ()=> archive(email.id));
+  }
+  else if (mailbox === 'archive') {
+    const unarchiveBtn = document.createElement('button');
+    unarchiveBtn.setAttribute('class', 'btn btn-sm btn-danger m-2 unarchive');
+    unarchiveBtn.innerHTML = 'unarchive';
+    emailDiv.appendChild(unarchiveBtn);
+    unarchiveBtn.addEventListener('click', ()=> unarchive(email.id));
   }
   emailsDiv.appendChild(emailDiv);
   emailDiv.addEventListener('click', ()=> {
@@ -145,14 +152,26 @@ function displayEmail(email_id, mailbox) {
 
 /* Change the read boolean flag to true once the email has been clicked */
 function markAsRead(email_id) {
-  /* To do */
   fetch(`/emails/${email_id}`, {
     method: 'PUT',
     body: JSON.stringify({ read: true })
   });
 }
 
-/* Archive - Unarchive email */
-function toggleArchive(email_id) {
-  /* To do */
+/* Archive */
+function archive(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT', 
+    body: JSON.stringify({
+      archived: true
+    })
+  });
+}
+
+/* Unarchive */
+function unarchive(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ archived: false })
+  });
 }
