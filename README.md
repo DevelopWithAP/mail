@@ -10,4 +10,4 @@ recieve, archive and reply to emails.
  * Gained a deeper understanding of DOM events and how to utilise them to produce more interactive browser applications.
  * This is still in progress...
 
-Project specs may be found at :  
+Project specs may be found at : (https://cs50.harvard.edu/web/2020/projects/3/mail/) 
