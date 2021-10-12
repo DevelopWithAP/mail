@@ -81,70 +81,78 @@ function load_mailbox(mailbox) {
 
   // make the request for a specific mailbox
   fetch(`/emails/${mailbox}`)
-    .then((response) => response.json())
-    .then((emails) => {
-      for (let email of emails){
-          renderEmail(email);
-      }
-    })
+  .then((response)=>response.json())
+  .then((emails)=> {
+    for (let email of emails) renderEmailList(email, mailbox);
+  });
       
 }
 
 /** Helper function to construct the individual email div */
-function renderEmail(email, mailbox) {
+function renderEmailList(email, mailbox) {
+  const emailsDiv = document.querySelector('#emails-view');
   const emailDiv = document.createElement('div');
-  emailDiv.setAttribute('class', 'border rounded mb-2');
-  emailDiv.setAttribute('id', 'emailDivId');
-  emailDiv.innerHTML += 
-  `
-    <div class="m-2">
-    <h5>${email.sender}</h5>
-    <p>Subject: ${email.subject}</p>
-    <hr>
-    <small>Sent: ${email.timestamp}</small>
+  emailDiv.setAttribute('class', 'border rounded mb-1');
+  email.read == false ? emailDiv.style.backgroundColor = 'white' : emailDiv.style.backgroundColor = 'lightgrey';
+  emailDiv.innerHTML = `
+    <div class="m-2" id="innerDiv">
+      <p> <strong> ${email.sender} </strong> </p>
+      <p> Subject: ${email.subject} </p>
+      <hr>
+      <small> Sent: ${email.timestamp} </small>
     </div>
+    <hr>
   `;
-  
-  document.querySelector('#emails-view').append(emailDiv);
-  emailDiv.addEventListener('click', ()=> displayEmail(email.id, mailbox));
+  if (mailbox === 'inbox' && email.archived == false) {
+    const archiveBtn = document.createElement('button');
+    archiveBtn.setAttribute('class', 'btn btn-sm btn-primary m-2 archive');
+    archiveBtn.innerHTML = 'archive';
+    emailDiv.appendChild(archiveBtn);
+    archiveBtn.addEventListener('click', ()=> toggleArchive(email.id));
+  }
+  emailsDiv.appendChild(emailDiv);
+  emailDiv.addEventListener('click', ()=> {
+    displayEmail(email.id, mailbox);
+    markAsRead(email.id)
+  });
+
 }
 
 function displayEmail(email_id, mailbox) {
-  markAsRead(email_id);
-  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#emails-view').style.display= 'none';
   document.querySelector('#email-view').style.display = 'block';
   document.querySelector('#email-view').innerHTML = '';
   fetch(`/emails/${email_id}`)
-    .then((response) => response.json())
-    .then((email) => {
-      const infoDiv = document.createElement('div');
-      infoDiv.setAttribute('class', 'border');
-      infoDiv.innerHTML +=
-      `
-      <div class="m-1">
-      <h5>${email.sender}</h5>
-      <p>Subject: ${email.subject}</p>
-      <p>Recipients: ${email.recipients}</p>
-      <div> ${email.body} </div>
-      <hr>
-      <small>Sent: ${email.timestamp}</small>
+  .then((response)=> response.json())
+  .then((email)=> {
+    const infoDiv = document.createElement('div');
+    infoDiv.setAttribute('class', 'border rounded mb-1');
+    infoDiv.innerHTML = `
+      <div class ="m-1">
+        <p> <strong> ${email.sender} </strong> </p>
+        <p>Recipients: ${email.recipients} </p>
+        <p>Subject: ${email.subject} </p>
+        <hr>
+        <div>${email.body}</div>
+        <hr>
+        <small> Sent: ${email.timestamp} </small>
+      </div>
     `;
-    document.querySelector('#email-view').append(infoDiv);
-  });
+    document.querySelector('#email-view').appendChild(infoDiv);
+  })
 }
 
 
 /* Change the read boolean flag to true once the email has been clicked */
 function markAsRead(email_id) {
+  /* To do */
   fetch(`/emails/${email_id}`, {
     method: 'PUT',
-    body: JSON.stringify({
-      read: true
-    })
-  })
-  const emailDiv = document.querySelector('#emailDivId');
-  fetch(`/emails/${email_id}`)
-  .then((response)=>response.json())
-  .then((email)=> email.read ? emailDiv.style.backgroundColor = 'white': emailDiv.style.backgroundColor = 'grey');
-  
+    body: JSON.stringify({ read: true })
+  });
+}
+
+/* Archive - Unarchive email */
+function toggleArchive(email_id) {
+  /* To do */
 }
