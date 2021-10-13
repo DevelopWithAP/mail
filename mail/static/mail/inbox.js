@@ -52,24 +52,6 @@ function compose_email() {
 
 function load_mailbox(mailbox) {
 
-  /*
-  if mailbox = 'inbox':
-      display email in appropriate background
-        if user clicks on email:
-          fetch all required email fields
-          mark as read
-      allow users to reply
-      allow users to archive 
-
-  else if mailbox = 'archive':
-      show('archive')
-      display email in appropriate background
-      allow users to unarchive
-
-  else if mailbox = 'sent':
-      show('sent')  
-  */
-
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
@@ -88,44 +70,41 @@ function load_mailbox(mailbox) {
       
 }
 
-/** Helper function to construct the individual email div */
+/** Helper function to construct the email list */
 function renderEmailList(email, mailbox) {
   const emailsDiv = document.querySelector('#emails-view');
   const emailDiv = document.createElement('div');
-  emailDiv.setAttribute('class', 'border rounded mb-1');
+  emailDiv.setAttribute('id', 'emailDiv');
+  emailDiv.setAttribute('class', 'border mb-1');
   email.read == false ? emailDiv.style.backgroundColor = 'white' : emailDiv.style.backgroundColor = 'lightgrey';
-  emailDiv.innerHTML = `
-    <div class="m-2" id="innerDiv">
-      <p> <strong> ${email.sender} </strong> </p>
-      <p> Subject: ${email.subject} </p>
-      <hr>
-      <small> Sent: ${email.timestamp} </small>
-    </div>
-    <hr>
+
+  const mainCol = document.createElement('div');
+  mainCol.setAttribute('class', 'row m-1');
+  mainCol.innerHTML = `
+    <div class="col-10" id="row"> <strong> ${email.sender} </strong> | ${email.subject} | <small>${email.timestamp}</small> </div>
+    <div class="col-2 justify-content-around d-flex flex-column"> 
+       <div> 
+           <button class="btn btn-sm btn-primary archive"> archive </button>
+         </div> 
+       </div>
   `;
-  if (mailbox === 'inbox' && email.archived == false) {
-    const archiveBtn = document.createElement('button');
-    archiveBtn.setAttribute('class', 'btn btn-sm btn-primary m-2 archive');
-    archiveBtn.innerHTML = 'archive';
-    emailDiv.appendChild(archiveBtn);
-    archiveBtn.addEventListener('click', ()=> archive(email.id));
-  }
-  else if (mailbox === 'archive') {
-    const unarchiveBtn = document.createElement('button');
-    unarchiveBtn.setAttribute('class', 'btn btn-sm btn-danger m-2 unarchive');
-    unarchiveBtn.innerHTML = 'unarchive';
-    emailDiv.appendChild(unarchiveBtn);
-    unarchiveBtn.addEventListener('click', ()=> unarchive(email.id));
-  }
+  emailDiv.appendChild(mainCol);
+
   emailsDiv.appendChild(emailDiv);
-  emailDiv.addEventListener('click', ()=> {
+
+  emailDiv.addEventListener('click', (e)=> {
     displayEmail(email.id, mailbox);
-    markAsRead(email.id)
+    if (e.target.matches('button')) {
+      toggleArchive(email.id);
+    }
   });
+
+
 
 }
 
-function displayEmail(email_id, mailbox) {
+function displayEmail(email_id) {
+  markAsRead(email_id);
   document.querySelector('#emails-view').style.display= 'none';
   document.querySelector('#email-view').style.display = 'block';
   document.querySelector('#email-view').innerHTML = '';
@@ -145,6 +124,9 @@ function displayEmail(email_id, mailbox) {
         <small> Sent: ${email.timestamp} </small>
       </div>
     `;
+    const replyBtn = document.createElement('button');
+
+
     document.querySelector('#email-view').appendChild(infoDiv);
   })
 }
@@ -155,23 +137,23 @@ function markAsRead(email_id) {
   fetch(`/emails/${email_id}`, {
     method: 'PUT',
     body: JSON.stringify({ read: true })
-  });
+  })
+  // print any errors to std out
+  .catch((error)=> console.log(error));
 }
 
-/* Archive */
-function archive(email_id) {
-  fetch(`/emails/${email_id}`, {
-    method: 'PUT', 
-    body: JSON.stringify({
-      archived: true
+
+ /* Toggle 'archived' flag of Email object */
+function toggleArchive(email_id) {
+  fetch(`/emails/${email_id}`)
+  .then((response)=> response.json())
+  .then((email) => {
+    fetch(`/emails/${email.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        archived: !email.archived
+      })
     })
-  });
-}
-
-/* Unarchive */
-function unarchive(email_id) {
-  fetch(`/emails/${email_id}`, {
-    method: 'PUT',
-    body: JSON.stringify({ archived: false })
-  });
+  })
+  .catch((error)=> console.log(error));
 }
