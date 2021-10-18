@@ -78,33 +78,80 @@ function renderEmailList(email, mailbox) {
   emailDiv.setAttribute('class', 'border mb-1');
   email.read == false ? emailDiv.style.backgroundColor = 'white' : emailDiv.style.backgroundColor = 'lightgrey';
 
-  const mainCol = document.createElement('div');
-  mainCol.setAttribute('class', 'row m-1');
-  mainCol.innerHTML = `
-    <div class="col-10" id="row"> <strong> ${email.sender} </strong> | ${email.subject} | <small>${email.timestamp}</small> </div>
-    <div class="col-2 justify-content-around d-flex flex-column"> 
-       <div> 
-           <button class="btn btn-sm btn-primary archive"> archive </button>
-         </div> 
-       </div>
-  `;
-  emailDiv.appendChild(mainCol);
+  if (mailbox === 'inbox') {
+    const mainCol = document.createElement('div');
+    mainCol.setAttribute('class', 'row m-1');
+    mainCol.innerHTML = `
+      <div class="col-10" id="row"> <strong> ${email.sender} </strong> | ${email.subject} | <small>${email.timestamp}</small> </div>
+      <div class="col-2 justify-content-around d-flex flex-column"> 
+        <div id="btnDiv"> 
+            <button class="btn btn-sm btn-primary archive"> archive </button>
+          </div> 
+        </div>
+    `;
+    
+    emailDiv.appendChild(mainCol);
 
-  emailsDiv.appendChild(emailDiv);
+    emailsDiv.appendChild(emailDiv);
 
-  emailDiv.addEventListener('click', (e)=> {
-    displayEmail(email.id, mailbox);
-    if (e.target.matches('button')) {
-      toggleArchive(email.id);
-    }
-  });
+    emailDiv.addEventListener('click', (event) => {
+      if (event.target.matches('button')) {
+        archiveEmail(email.id);
+      }
+      else {
+        markAsRead(email.id);
+        displayEmail(email.id);
+      }
+    });
+  }
+  else if (mailbox === 'archive') {
+    const mainCol = document.createElement('div');
+    mainCol.setAttribute('class', 'row m-1');
+    mainCol.innerHTML = `
+      <div class="col-10" id="row"> <strong> ${email.sender} </strong> | ${email.subject} | <small>${email.timestamp}</small> </div>
+      <div class="col-2 justify-content-around d-flex flex-column"> 
+        <div id="btnDiv"> 
+            <button class="btn btn-sm btn-primary unarchive"> unarchive </button>
+          </div> 
+        </div>
+    `;
+    
+    emailDiv.appendChild(mainCol);
+
+    emailsDiv.appendChild(emailDiv);
+
+    emailDiv.addEventListener('click', (event) => {
+      if (event.target.matches('button')) {
+        unarchiveEmail(email.id);
+      }
+      else {
+        markAsRead(email.id);
+        displayEmail(email.id);
+      }
+    });
+  }
+  else if (mailbox === 'sent') {
+    const mainCol = document.createElement('div');
+    mainCol.setAttribute('class', 'row m-1');
+    mainCol.innerHTML = `
+      <div class="col-10" id="row"> <strong> ${email.sender} </strong> | ${email.subject} | <small>${email.timestamp}</small> </div>
+    `;
+    
+    emailDiv.appendChild(mainCol);
+
+    emailsDiv.appendChild(emailDiv);
 
 
-
+    emailDiv.addEventListener('click', () => {
+      displayEmail(email.id);
+    });
+  }
+  
+  
 }
 
+
 function displayEmail(email_id) {
-  markAsRead(email_id);
   document.querySelector('#emails-view').style.display= 'none';
   document.querySelector('#email-view').style.display = 'block';
   document.querySelector('#email-view').innerHTML = '';
@@ -142,18 +189,34 @@ function markAsRead(email_id) {
   .catch((error)=> console.log(error));
 }
 
+function archiveEmail(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT', 
+    body: JSON.stringify({ archived: true })
+  })
+  .catch(error => console.log(error));
+}
+
+function unarchiveEmail(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT', 
+    body: JSON.stringify({ archived: false})
+  })
+  .catch(error => console.log(error));
+}
+
 
  /* Toggle 'archived' flag of Email object */
-function toggleArchive(email_id) {
-  fetch(`/emails/${email_id}`)
-  .then((response)=> response.json())
-  .then((email) => {
-    fetch(`/emails/${email.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        archived: !email.archived
-      })
-    })
-  })
-  .catch((error)=> console.log(error));
-}
+// function toggleArchive(email_id) {
+//   fetch(`/emails/${email_id}`)
+//   .then((response)=> response.json())
+//   .then((email) => {
+//     fetch(`/emails/${email.id}`, {
+//       method: 'PUT',
+//       body: JSON.stringify({
+//         archived: !email.archived
+//       })
+//     })
+//   })
+//   .catch((error)=> console.log(error));
+// }

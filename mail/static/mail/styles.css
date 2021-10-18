@@ -2,4 +2,12 @@ textarea {
     min-height: 400px;
 }
 
+#mainDiv {
+    display: flex;
+}
+
+#btnDiv, #emailInfo {
+    display: inline-block;
+}
+
 
