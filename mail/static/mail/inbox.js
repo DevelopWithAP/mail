@@ -173,10 +173,33 @@ function displayEmail(email_id) {
         <small> Sent: ${email.timestamp} </small>
       </div>
     `;
-    const replyBtn = document.createElement('button');
 
+    const replyBtn = document.createElement('button');
+    replyBtn.setAttribute('class', 'btn btn-sm btn-primary');
+    replyBtn.textContent = 'Reply';
 
     document.querySelector('#email-view').appendChild(infoDiv);
+    document.querySelector('#email-view').appendChild(replyBtn);
+
+    replyBtn.addEventListener('click', () => {
+      document.querySelector('#email-view').style.display = 'none';
+      compose_email();
+      document.querySelector('#compose-recipients').value = email.sender;
+
+      if (!email.subject.startsWith('Re:')) {
+        document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
+      }
+      else {
+        let split = email.subject.split('Re:');
+        let target = split[1].trim();
+        document.querySelector('#compose-subject').value = target;
+      }
+
+      document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: 
+      ${email.body}
+      `;
+    });
+
   })
 }
 
@@ -206,19 +229,3 @@ function unarchiveEmail(email_id) {
   })
   .catch(error => console.log(error));
 }
-
-
- /* Toggle 'archived' flag of Email object */
-// function toggleArchive(email_id) {
-//   fetch(`/emails/${email_id}`)
-//   .then((response)=> response.json())
-//   .then((email) => {
-//     fetch(`/emails/${email.id}`, {
-//       method: 'PUT',
-//       body: JSON.stringify({
-//         archived: !email.archived
-//       })
-//     })
-//   })
-//   .catch((error)=> console.log(error));
-// }
