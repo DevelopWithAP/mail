@@ -97,6 +97,7 @@ function renderEmailList(email, mailbox) {
     emailDiv.addEventListener('click', (event) => {
       if (event.target.matches('button')) {
         archiveEmail(email.id);
+        emailDiv.style.display = 'none';
       }
       else {
         markAsRead(email.id);
@@ -109,7 +110,7 @@ function renderEmailList(email, mailbox) {
     mainCol.setAttribute('class', 'row m-1');
     mainCol.innerHTML = `
       <div class="col-10" id="row"> <strong> ${email.sender} </strong> | ${email.subject} | <small>${email.timestamp}</small> </div>
-      <div class="col-2 justify-content-around d-flex flex-column"> 
+      <div class="justify-content-around d-flex flex-column"> 
         <div id="btnDiv"> 
             <button class="btn btn-sm btn-primary unarchive"> unarchive </button>
           </div> 
@@ -123,6 +124,7 @@ function renderEmailList(email, mailbox) {
     emailDiv.addEventListener('click', (event) => {
       if (event.target.matches('button')) {
         unarchiveEmail(email.id);
+        emailDiv.style.display = 'none';
       }
       else {
         markAsRead(email.id);
