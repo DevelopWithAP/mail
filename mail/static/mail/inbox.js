@@ -15,6 +15,7 @@ function compose_email() {
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#email-view').style.display = 'none';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -103,53 +104,62 @@ function displayEmail(email_id, mailbox) {
     .then((response) => response.json())
     .then((email) => {
         const infoDiv = document.createElement('div');
-        infoDiv.setAttribute('class', 'border rounded mb-1');
+        infoDiv.setAttribute('class', 'border-bottom mb-1');
         infoDiv.innerHTML = `
-      <div class ="m-1">
-        <p> <strong> ${email.sender} </strong> </p>
-        <p>Recipients: ${email.recipients} </p>
-        <p>Subject: ${email.subject} </p>
-        <hr>
-        <div>${email.body}</div>
-        <hr>
-        <small> Sent: ${email.timestamp} </small>
-      </div>
+          <div class ="m-1">
+            <p>Sender: <strong> ${email.sender} </strong> </p>
+            <p>Recipients: ${email.recipients} </p>
+            <p>Subject: ${email.subject} </p>
+            <small> Sent: ${email.timestamp} </small>
+        </div>
     `;
+      document.querySelector('#email-view').appendChild(infoDiv);
 
-        const replyBtn = document.createElement('button');
-        replyBtn.setAttribute('class', 'btn btn-sm btn-primary');
-        replyBtn.textContent = 'Reply';
+      const btnsDiv = document.createElement('div');
+      btnsDiv.setAttribute('class', 'btn-group');
+      btnsDiv.setAttribute('role', 'group');
+      document.querySelector('#email-view').appendChild(btnsDiv);
 
-        document.querySelector('#email-view').appendChild(infoDiv);
-        document.querySelector('#email-view').appendChild(replyBtn);
+      const replyBtn = document.createElement('button');
+      replyBtn.setAttribute('class', 'btn btn-sm btn-outline-primary');
+      replyBtn.textContent = 'Reply';
+      btnsDiv.appendChild(replyBtn);
 
-        replyBtn.addEventListener('click', () => {
-          document.querySelector('#email-view').style.display = 'none';
-          compose_email();
-          document.querySelector('#compose-recipients').value = email.sender;
+      const archiveBtn = document.createElement('button');
+      archiveBtn.setAttribute('class', 'btn btn-sm btn-outline-info ml-1');
+      email.archived == false ? archiveBtn.textContent = 'Archive' : archiveBtn.textContent = 'Unarchive';
+      btnsDiv.appendChild(archiveBtn);
 
-          if (!email.subject.startsWith('Re:')) {
-            document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
-          }
-          else {
-            let split = email.subject.split('Re:');
-            let target = split[1].trim();
-            document.querySelector('#compose-subject').value = target;
-          }
-
-          document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: 
-      ${email.body}
+      const mainDiv = document.createElement('div');
+      mainDiv.setAttribute('class', 'mt-3');
+      mainDiv.innerHTML = `
+        <p> 
+        ${email.body}
+        </p>
       `;
-        });
+      document.querySelector('#email-view').appendChild(mainDiv);
 
-        const archiveBtn = document.createElement('button');
-        archiveBtn.setAttribute('class', 'btn btn-sm btn-info ml-1');
-        email.archived == false ? archiveBtn.textContent = 'Move to Archive' : archiveBtn.textContent = 'Move to Inbox';
-        document.querySelector('#email-view').appendChild(archiveBtn);
+      replyBtn.addEventListener('click', () => {
+        document.querySelector('#email-view').style.display = 'none';
+        compose_email();
+        document.querySelector('#compose-recipients').value = email.sender;
 
-        archiveBtn.addEventListener('click', () => toggleArchive(email.id) );
+        if (!email.subject.startsWith('Re:')) {
+          document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
+        }
+        else {
+          let split = email.subject.split('Re:');
+          let target = split[1].trim();
+          document.querySelector('#compose-subject').value = target;
+        }
 
+        document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: 
+        ${email.body}
+        `;
+      });
 
+      archiveBtn.addEventListener('click', ()=> toggleArchive(email.id))
+  
     })
 }
 
