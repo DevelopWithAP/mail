@@ -131,12 +131,8 @@ function displayEmail(email_id, mailbox) {
       btnsDiv.appendChild(archiveBtn);
 
       const mainDiv = document.createElement('div');
-      mainDiv.setAttribute('class', 'mt-3');
-      mainDiv.innerHTML = `
-        <p> 
-        ${email.body}
-        </p>
-      `;
+      mainDiv.setAttribute('class', 'container mt-3');
+      mainDiv.innerText = email.body;
       document.querySelector('#email-view').appendChild(mainDiv);
 
       replyBtn.addEventListener('click', () => {
@@ -152,10 +148,8 @@ function displayEmail(email_id, mailbox) {
           let target = split[1].trim();
           document.querySelector('#compose-subject').value = target;
         }
-
-        document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: 
-        ${email.body}
-        `;
+        const preFill = `\nOn ${email.timestamp} ${email.sender} wrote:\n`;
+        document.querySelector('#compose-body').value = preFill + email.body;
       });
 
       archiveBtn.addEventListener('click', ()=> toggleArchive(email.id))
