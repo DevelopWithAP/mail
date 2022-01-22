@@ -41,10 +41,23 @@ function compose_email() {
     })
     .then(response => response.json())
     .then(result => console.log(result));
+  sendSuccess();
   load_mailbox("sent");  
   })
   
 }
+
+/** Helper function to flash success div */
+const sendSuccess = ()=> {
+  const successDiv = document.querySelector('#success-msg');
+  successDiv.style.display = 'block';
+  setTimeout(()=> {
+    successDiv.style.transition = '.5s';
+    successDiv.style.opacity = '0';
+    successDiv.style.display = 'none';
+  }, 2000);
+}
+
 
 
 function load_mailbox(mailbox) {
@@ -55,7 +68,8 @@ function load_mailbox(mailbox) {
   document.querySelector("#email-view").style.display = "none";
 
   // Show the mailbox name
-  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  document.querySelector('#emails-view').innerHTML = `
+  <h3 class="text-center">${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3> <hr/>`;
  
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
@@ -73,15 +87,15 @@ function showEmailList(item, mailbox) {
 
   /* div displaying individual mailbox email */
   const emailDiv = document.createElement("div");
-  emailDiv.setAttribute("class", "border rounded mt-2");
+  emailDiv.setAttribute("class", "border mt-1 mb-1");
   
   /* display email in appropriate background colour depending on it 'read' status */
-  item.read == false ? emailDiv.style.backgroundColor = "white" : emailDiv.style.backgroundColor = "#d3d3d3";
+  item.read == false ? emailDiv.style.backgroundColor = "white" : emailDiv.style.backgroundColor = "gainsboro";
 
   /* Populate emailDiv with the appropriate information */
   emailDiv.innerHTML = `
-    <div class="m-2">  
-      <p> <strong> ${item.sender} </strong> | ${item.subject} | ${item.timestamp} </p>
+    <div class="mx-3">  
+      <p class="my-1"> <strong> ${item.sender} </strong> | ${item.subject} | ${item.timestamp} </p>
     </div>
   `;
 
@@ -170,9 +184,10 @@ function showEmail(item_id, mailbox) {
       buttons.appendChild(archBtn);
       buttons.appendChild(replyBtn);
     }
-
+    else {
+      buttons.parentNode.removeChild(buttons);
+    }
     document.querySelector("#innerDiv").appendChild(buttons);
-
   });
 }
 
